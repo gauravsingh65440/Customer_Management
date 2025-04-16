@@ -74,7 +74,7 @@ UserModel.addHook("beforeUpdate", async (user, options) => {
 });
 
 // Custom Instance Methods
-// Instance method to compare the pasword provided by the user during the login process.
+// Instance method to compare the password provided by the user.
 UserModel.prototype.comparePassword = async function (enteredPassword) {
 	// console.log("Entered:", enteredPassword);
 	// console.log("Stored Hash:", this.password);
