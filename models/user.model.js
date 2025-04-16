@@ -46,7 +46,9 @@ const UserModel = sequelize.define(
 			type: DataTypes.STRING,
 		},
 	},
-	{}
+	{
+		tableName: "users",
+	}
 );
 
 // Custom Hooks
@@ -60,7 +62,6 @@ UserModel.addHook("beforeCreate", async (user, options) => {
 		user.password = hashedPassword;
 	}
 });
-
 
 // `beforeUpdate` hook is called when you update an existing record.
 // Only triggers if .save() or .update() is called on an existing record

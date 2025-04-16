@@ -9,22 +9,25 @@ const AppRoutes = require("./routes/index");
 const app = express();
 
 // Middlewares
-app.use(cors({
-    origin: "*", // allowing all origins - in Development Mode,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-    credentials: true,
-}));
+app.use(
+	cors({
+		origin: "*", // allowing all origins - in Development Mode,
+		methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+		credentials: true,
+	})
+);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(helmet());
 
 // App Routes
 app.get("/", (req, res) => {
-    return res.status(200).send("Hello from server!")
+	return res.status(200).send("Hello from server!");
 });
 
-app.use("/api/v1", AppRoutes)
+app.use("/api/v1", AppRoutes);
 
 // Global Error Hndling Middleware
 app.use(globalErrorHandlingMiddleware);
