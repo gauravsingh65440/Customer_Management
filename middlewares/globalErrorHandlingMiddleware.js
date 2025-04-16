@@ -4,7 +4,8 @@ function globalErrorHandlingMiddleware(error, req, res, next) {
 
     return res.status(error.statusCode).json({
         status: error.status,
-        message: error.message
+        message: error.message,
+        stack: error.stack
     });
 };
 

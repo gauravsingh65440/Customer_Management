@@ -1,11 +1,10 @@
 const UserModel = require("../models/user.model");
 const asyncHandler = require("../utils/asyncHandler");
 const CustomError = require("../utils/CustomError");
-const bcrypt = require("bcrypt");
 const JWT = require("../utils/JWT");
 const environmentVariables = require("../constants/environmentVariables");
 
-// REGISTER new user
+// REGISTER NEW USER
 module.exports.register = asyncHandler(async (req, res, next) => {
 	const { name, email, password, phone, address } = req.body;
 	console.log(req.body);
@@ -21,11 +20,10 @@ module.exports.register = asyncHandler(async (req, res, next) => {
 	}
 
 	// If account doesn't exists - register this user.
-	const hashedPassword = await bcrypt.hash(password, 12); // password hashing
 	const newUser = await UserModel.create({
 		name,
 		email,
-		password: hashedPassword,
+		password /* password hashing done in the model. */,
 		phone,
 		address,
 	});
@@ -54,14 +52,12 @@ module.exports.login = asyncHandler(async (req, res, next) => {
 	}
 
 	// Check: whether user enters the correct password or not.
-	const isMatched = await bcrypt.compare(password, user.password);
-	if (!isMatched) {
+	if (!(await user.comparePassword(password))) {
 		throw new CustomError("Incorrect Password!", 400);
 	}
 
 	// Sign JWT Token
 	const token = JWT.generateJwtToken({ userId: user.id });
-
 	return res
 		.status(200)
 		.cookie("jwt", token, {
@@ -114,7 +110,6 @@ module.exports.isAuthenticated = asyncHandler(async (req, res, next) => {
 
 	const decoded = JWT.verifyJwtToken(token);
 	const user = await UserModel.findByPk(decoded.userId);
-
 	if (!user) {
 		throw new CustomError(
 			"The user belonging to this token no longer exists. Log in instead!",
@@ -122,7 +117,14 @@ module.exports.isAuthenticated = asyncHandler(async (req, res, next) => {
 		);
 	}
 
-	req.user = user;
-	// console.log(user);
+	// check if token is still valid.
+	if (!(await user.isTokenValid(decoded.iat))) {
+		throw new CustomError(
+			"Invalid token, the user may have recently changed their password.",
+			401
+		);
+	}
+
+	req.user = user; // attach the `user` to the request object.
 	next();
 });

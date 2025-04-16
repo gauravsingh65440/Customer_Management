@@ -124,14 +124,12 @@ module.exports.updatePassword = asyncHandler(async (req, res, next) => {
 	//     throw new CustomError("New password cannot be same as the new password!", 400);
 	// }
 
-	const isMatched = await bcrypt.compare(currentPassword, user.password);
-	if (!isMatched) {
+	if (!(await user.comparePassword(currentPassword))) {
 		throw new CustomError("Incorrect current password!", 400);
 	}
 
-	const hashedPassword = await bcrypt.hash(newPassword, 12); // password hashing
-
-	user.password = hashedPassword;
+	user.password =
+		newPassword; /* will be hashed by beforeUpdate hook */
 	user.passwordChangedAt = Date.now();
 
 	await user.save(); // save the changes
